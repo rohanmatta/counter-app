@@ -10,17 +10,19 @@ export class counterApp extends DDDSuper(LitElement) {
   constructor() {
     super();
     this.title = "";
+    this.count = 0;
   }
 
   static get properties() {
     return {
       title: { type: String },
+      count: { type: Number },
     };
   }
 
   static get styles() {
     return [super.styles,
-    css`
+      css`
       :host {
         display: block;
         color: var(--ddd-theme-primary);
@@ -39,12 +41,25 @@ export class counterApp extends DDDSuper(LitElement) {
     `];
   }
 
+  increment() {
+    this.count++;
+  }
+
+  decrement() {
+    this.count--;
+  }
+
   render() {
     return html`
-<div class="wrapper">
-  <div>${this.title}</div>
-  <slot></slot>
-</div>`;
+    <div class="wrapper">
+      <div>${this.count}</div>
+      <button @click="${this.increment}">+</button>
+      <button @click="${this.decrement}">-</button>
+      <div>${this.title}</div>
+      <slot></slot>
+      <!-- Confetti container -->
+      <confetti-container id="confetti"></confetti-container>
+    </div>`;
   }
 
   /**
@@ -53,6 +68,25 @@ export class counterApp extends DDDSuper(LitElement) {
   static get haxProperties() {
     return new URL(`./lib/${this.tag}.haxProperties.json`, import.meta.url)
       .href;
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('count')) {
+      if (this.count === 5) {
+        this.makeItRain();  // Trigger confetti when count is 5
+      }
+    }
+  }
+
+  makeItRain() {
+    // import confetti-container
+    import("@haxtheweb/multiple-choice/lib/confetti-container.js").then(
+      (module) => {
+        setTimeout(() => {
+          this.shadowRoot.querySelector("#confetti").setAttribute("popped", "");
+        }, 0);
+      }
+    );
   }
 }
 
